@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFTabTip", "WPFTabTip\WPFTabTip.csproj", "{BE335058-C5DE-4EB6-8EEB-8E6FC9F5081B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UITest", "UITest\UITest.csproj", "{A0E4A0A6-118A-4ED8-9AEE-B127B565EE02}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{BE335058-C5DE-4EB6-8EEB-8E6FC9F5081B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE335058-C5DE-4EB6-8EEB-8E6FC9F5081B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE335058-C5DE-4EB6-8EEB-8E6FC9F5081B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0E4A0A6-118A-4ED8-9AEE-B127B565EE02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0E4A0A6-118A-4ED8-9AEE-B127B565EE02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0E4A0A6-118A-4ED8-9AEE-B127B565EE02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0E4A0A6-118A-4ED8-9AEE-B127B565EE02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
