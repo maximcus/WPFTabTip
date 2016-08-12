@@ -1,46 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Reactive.Linq;
 
 namespace WPFTabTip
 {
-    public static class PoolingTimer
+    internal static class PoolingTimer
     {
-        private static Timer timer;
+        private static bool Pooling;
 
-        public static void Start(Func<bool> StopTimer, TimeSpan dueTime, TimeSpan period)
+        public static void PoolUntilTrue(Func<bool> PoolingFunc, Action Callback, TimeSpan dueTime, TimeSpan period)
         {
-            if (timer == null)
-            {
-                timer = new Timer(
-                    (obj) =>
-                    {
-                        if (StopTimer())
-                            Dispose();
-                    }, 
-                state: null, 
-                dueTime: (int) dueTime.TotalMilliseconds, 
-                period: (int) period.TotalMilliseconds);
-            }
-        }
+            if (Pooling) return;
 
-        private static void Dispose()
-        {
-            try
-            {
-                timer.Dispose();
-            }
-            catch (Exception)
-            {
-                // ignore
-            }
-            finally
-            {
-                timer = null;
-            }
+            Pooling = true;
+
+            Observable.Timer(dueTime, period)
+                .Select(_ => PoolingFunc())
+                .TakeWhile(stop => stop != true)
+                .Where(stop => stop == true)
+                .Finally(() => Pooling = false)
+                .Subscribe(
+                    onNext: _ => { },
+                    onCompleted: Callback);
         }
     }
 }
