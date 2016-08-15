@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace WPFTabTip
