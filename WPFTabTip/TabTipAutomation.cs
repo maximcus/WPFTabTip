@@ -20,10 +20,24 @@ namespace WPFTabTip
 
         private static readonly List<Type> BindedUIElements = new List<Type>();
 
+        /// <summary>
+        /// TabTip automation happens only when no keyboard is connected to device.
+        /// Set IgnoreHardwareKeyboard to true if you want to automate
+        /// TabTip even if keyboard is connected.
+        /// </summary>
+        public static bool IgnoreHardwareKeyboard { get; set; }
+
+        /// <summary>
+        /// Description of keyboards to ignore if there is only one instance of given keyboard.
+        /// If you want to ignore some ghost keyboard, add it's description to this list
+        /// </summary>
+        public static List<string> ListOfHardwareKeyboardsToIgnoreIfSingleInstance => HardwareKeyboard.IgnoreIfSingleInstance;
+
         private static void AutomateTabTipClose(IObservable<bool> FocusObservable)
         {
             FocusObservable
                 .ObserveOn(Scheduler.Default)
+                .Where(_ => IgnoreHardwareKeyboard || !HardwareKeyboard.IsConnectedAsync().Result)
                 .Throttle(TimeSpan.FromMilliseconds(100)) // Close only if no other UIElement got focus in 100 ms
                 .Where(gotFocus => gotFocus == false)
                 .Subscribe(_ => TabTip.Close());
@@ -33,9 +47,16 @@ namespace WPFTabTip
         {
             FocusObservable
                 .ObserveOn(Scheduler.Default)
+                .Where(_ => IgnoreHardwareKeyboard || !HardwareKeyboard.IsConnectedAsync().Result)
                 .Where(gotFocus => gotFocus == true)
                 .Subscribe(_ => TabTip.OpenAndStartPoolingForClosedEvent());
         }
+
+        /// <summary>
+        /// Automate TabTip for given UIElement.
+        /// Keyboard opens and closes on GotFocusEvent and LostFocusEvent respectively.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public static void BindTo<T>() where T : UIElement
         {
             if (BindedUIElements.Contains(typeof(T)))
