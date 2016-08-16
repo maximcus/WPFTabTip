@@ -7,7 +7,7 @@ namespace WPFTabTip
     {
         private static bool Pooling;
 
-        public static void PoolUntilTrue(Func<bool> PoolingFunc, Action Callback, TimeSpan dueTime, TimeSpan period)
+        internal static void PoolUntilTrue(Func<bool> PoolingFunc, Action Callback, TimeSpan dueTime, TimeSpan period)
         {
             if (Pooling) return;
 

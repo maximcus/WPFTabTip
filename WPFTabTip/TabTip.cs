@@ -89,8 +89,18 @@ namespace WPFTabTip
             if (TabTipClosed())
                 return new Rectangle();
 
+            return GetWouldBeTabTipRectangle();
+        }
+
+        /// <summary>
+        /// Gets Window Rectangle which would be occupied by TabTip if TabTip was opened.
+        /// </summary>
+        /// <returns></returns>
+        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
+        public static Rectangle GetWouldBeTabTipRectangle()
+        {
             RECT rect;
-            
+
             if (!GetWindowRect(new HandleRef(null, GetTabTipWindowHandle()), out rect))
                 return new Rectangle();
 

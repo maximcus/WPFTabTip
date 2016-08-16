@@ -1,4 +1,9 @@
 ﻿PresentationCore
+PresentationFramework
+System.Xaml
 WindowsBase
+
 System.Reactive
+
 System.Management
+System.Drawing
