@@ -11,11 +11,13 @@ namespace WPFTabTip
     {
         static TabTipAutomation()
         {
+            TabTip.Closed += () => FocusSubject.OnNext(new Tuple<UIElement, bool>(null, false));
+
             AutomateTabTipOpen(FocusSubject.AsObservable());
             AutomateTabTipClose(FocusSubject.AsObservable());
         }
 
-        private static readonly Subject<bool> FocusSubject = new Subject<bool>(); 
+        private static readonly Subject<Tuple<UIElement, bool>> FocusSubject = new Subject<Tuple<UIElement, bool>>(); 
 
         private static readonly List<Type> BindedUIElements = new List<Type>();
 
@@ -32,23 +34,27 @@ namespace WPFTabTip
         /// </summary>
         public static List<string> ListOfHardwareKeyboardsToIgnoreIfSingleInstance => HardwareKeyboard.IgnoreIfSingleInstance;
 
-        private static void AutomateTabTipClose(IObservable<bool> FocusObservable)
+        private static void AutomateTabTipClose(IObservable<Tuple<UIElement, bool>> FocusObservable)
         {
             FocusObservable
                 .ObserveOn(Scheduler.Default)
                 .Where(_ => IgnoreHardwareKeyboard || !HardwareKeyboard.IsConnectedAsync().Result)
                 .Throttle(TimeSpan.FromMilliseconds(100)) // Close only if no other UIElement got focus in 100 ms
-                .Where(gotFocus => gotFocus == false)
-                .Subscribe(_ => TabTip.Close());
+                .Where(tuple => tuple.Item2 == false)
+                .Do(_ => TabTip.Close())
+                .ObserveOnDispatcher()
+                .Subscribe(_ => AnimationHelper.GetEverythingInToWorkAreaWithTabTipClosed());
         }
 
-        private static void AutomateTabTipOpen(IObservable<bool> FocusObservable)
+        private static void AutomateTabTipOpen(IObservable<Tuple<UIElement, bool>> FocusObservable)
         {
             FocusObservable
                 .ObserveOn(Scheduler.Default)
                 .Where(_ => IgnoreHardwareKeyboard || !HardwareKeyboard.IsConnectedAsync().Result)
-                .Where(gotFocus => gotFocus == true)
-                .Subscribe(_ => TabTip.OpenAndStartPoolingForClosedEvent());
+                .Where(tuple => tuple.Item2 == true)
+                .Do(_ => TabTip.OpenUndockedAndStartPoolingForClosedEvent())
+                .ObserveOnDispatcher()
+                .Subscribe(tuple => AnimationHelper.GetUIElementInToWorkAreaWithTabTipOpened(tuple.Item1));
         }
 
         /// <summary>
@@ -61,8 +67,16 @@ namespace WPFTabTip
             if (BindedUIElements.Contains(typeof(T)))
                 return;
 
-            EventManager.RegisterClassHandler(classType: typeof(T), routedEvent: UIElement.GotFocusEvent, handler: new RoutedEventHandler((s, e) => FocusSubject.OnNext(true)), handledEventsToo: true);
-            EventManager.RegisterClassHandler(classType: typeof(T), routedEvent: UIElement.LostFocusEvent, handler: new RoutedEventHandler((s, e) => FocusSubject.OnNext(false)), handledEventsToo: true);
+            EventManager.RegisterClassHandler(
+                classType: typeof(T), 
+                routedEvent: UIElement.GotFocusEvent, 
+                handler: new RoutedEventHandler((s, e) => FocusSubject.OnNext(new Tuple<UIElement, bool>((UIElement) s, true))), 
+                handledEventsToo: true);
+            EventManager.RegisterClassHandler(
+                classType: typeof(T), 
+                routedEvent: UIElement.LostFocusEvent, 
+                handler: new RoutedEventHandler((s, e) => FocusSubject.OnNext(new Tuple<UIElement, bool>((UIElement) s, false))), 
+                handledEventsToo: true);
 
             BindedUIElements.Add(typeof(T));
         }

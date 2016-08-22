@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using Microsoft.Win32;
 
 namespace WPFTabTip
 {
@@ -41,9 +42,9 @@ namespace WPFTabTip
 
         private static IntPtr GetTabTipWindowHandle() => FindWindow(tabTipWindowClassName, null);
         
-        internal static void OpenAndStartPoolingForClosedEvent()
+        internal static void OpenUndockedAndStartPoolingForClosedEvent()
         {
-            Process.Start(TabTipExecPath);
+            OpenUndocked();
             StartPoolingForTabTipClosedEvent();
         }
 
@@ -51,6 +52,25 @@ namespace WPFTabTip
         /// Open TabTip
         /// </summary>
         public static void Open() => Process.Start(TabTipExecPath);
+
+        /// <summary>
+        /// Open TabTip in undocked state
+        /// </summary>
+        public static void OpenUndocked()
+        {
+            const string TabTipRegistryKeyName = @"HKEY_CURRENT_USER\Software\Microsoft\TabletTip\1.7";
+            const string TabTipDockedKey = "EdgeTargetDockedState";
+            const string TabTipProcessName = "TabTip";
+
+            int docked = (int)Registry.GetValue(TabTipRegistryKeyName, TabTipDockedKey, 0);
+            if (docked == 1)
+            {
+                Registry.SetValue(TabTipRegistryKeyName, TabTipDockedKey, 0);
+                foreach (Process tabTipProcess in Process.GetProcessesByName(TabTipProcessName))
+                    tabTipProcess.Kill();
+            }
+            Open();
+        }
 
         /// <summary>
         /// Close TabTip
@@ -79,6 +99,9 @@ namespace WPFTabTip
             return (KeyboardWnd.ToInt32() == 0 || GetWindowLong(KeyboardWnd, GWL_STYLE) == KeyboardClosedStyle);
         }
 
+        // ReSharper disable once UnusedMember.Local
+        private static bool IsTabTipProcessRunning => GetTabTipWindowHandle() != IntPtr.Zero;
+
         /// <summary>
         /// Gets TabTip Window Rectangle
         /// </summary>
@@ -89,12 +112,27 @@ namespace WPFTabTip
             if (TabTipClosed())
                 return new Rectangle();
 
-            RECT rect;
-            
-            if (!GetWindowRect(new HandleRef(null, GetTabTipWindowHandle()), out rect))
-                return new Rectangle();
+            return GetWouldBeTabTipRectangle();
+        }
 
-            return new Rectangle(x: rect.Left, y: rect.Top, width: rect.Right - rect.Left + 1, height: rect.Bottom - rect.Top + 1);
+        private static Rectangle previousTabTipRectangle;
+
+        /// <summary>
+        /// Gets Window Rectangle which would be occupied by TabTip if TabTip was opened.
+        /// </summary>
+        /// <returns></returns>
+        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement")]
+        internal static Rectangle GetWouldBeTabTipRectangle()
+        {
+            RECT rect;
+
+            if (!GetWindowRect(new HandleRef(null, GetTabTipWindowHandle()), out rect))
+                return previousTabTipRectangle;
+
+            Rectangle wouldBeTabTipRectangle = new Rectangle(x: rect.Left, y: rect.Top, width: rect.Right - rect.Left + 1, height: rect.Bottom - rect.Top + 1);
+            previousTabTipRectangle = wouldBeTabTipRectangle;
+
+            return wouldBeTabTipRectangle;
         }
     }
 }
