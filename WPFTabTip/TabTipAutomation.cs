@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -23,11 +24,15 @@ namespace WPFTabTip
         private static readonly List<Type> BindedUIElements = new List<Type>();
 
         /// <summary>
-        /// TabTip automation happens only when no keyboard is connected to device.
-        /// Set IgnoreHardwareKeyboard to true if you want to automate
+        /// By default TabTip automation happens only when no keyboard is connected to device.
+        /// Change IgnoreHardwareKeyboard if you want to automate
         /// TabTip even if keyboard is connected.
         /// </summary>
-        public static bool IgnoreHardwareKeyboard { get; set; }
+        public static HardwareKeyboardIgnoreOptions IgnoreHardwareKeyboard
+        {
+            get { return HardwareKeyboard.IgnoreOptions; }
+            set { HardwareKeyboard.IgnoreOptions = value; } 
+        }
 
         /// <summary>
         /// Description of keyboards to ignore if there is only one instance of given keyboard.
@@ -39,7 +44,7 @@ namespace WPFTabTip
         {
             FocusObservable
                 .ObserveOn(Scheduler.Default)
-                .Where(_ => IgnoreHardwareKeyboard || !HardwareKeyboard.IsConnectedAsync().Result)
+                .Where(_ => IgnoreHardwareKeyboard == HardwareKeyboardIgnoreOptions.IgnoreAll || !HardwareKeyboard.IsConnectedAsync().Result)
                 .Throttle(TimeSpan.FromMilliseconds(100)) // Close only if no other UIElement got focus in 100 ms
                 .Where(tuple => tuple.Item2 == false)
                 .Do(_ => TabTip.Close())
@@ -54,7 +59,7 @@ namespace WPFTabTip
         {
             FocusObservable
                 .ObserveOn(Scheduler.Default)
-                .Where(_ => IgnoreHardwareKeyboard || !HardwareKeyboard.IsConnectedAsync().Result)
+                .Where(_ => IgnoreHardwareKeyboard == HardwareKeyboardIgnoreOptions.IgnoreAll || !HardwareKeyboard.IsConnectedAsync().Result)
                 .Where(tuple => tuple.Item2 == true)
                 .Do(_ => TabTip.OpenUndockedAndStartPoolingForClosedEvent())
                 .ObserveOnDispatcher()

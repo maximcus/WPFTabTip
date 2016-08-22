@@ -5,6 +5,30 @@ using System.Threading.Tasks;
 
 namespace WPFTabTip
 {
+    public enum HardwareKeyboardIgnoreOptions
+    {
+        /// <summary>
+        /// Do not ignore any keyboard.
+        /// </summary>
+        DoNotIgnore,
+
+        /// <summary>
+        /// Ignore keyboard, if there is only one, and it's description 
+        /// can be found in ListOfHardwareKeyboardsToIgnoreIfSingleInstance.
+        /// </summary>
+        IgnoreIfSingleInstanceOnList,
+
+        /// <summary>
+        /// Ignore keyboard, if there is only one.
+        /// </summary>
+        IgnoreIfSingleInstance,
+
+        /// <summary>
+        /// Ignore all keyboards
+        /// </summary>
+        IgnoreAll
+    }
+
     internal static class HardwareKeyboard
     {
         private static bool? _isConnected;
@@ -27,10 +51,22 @@ namespace WPFTabTip
                 if (Keyboards.Count > 1)
                     return true;
 
-                if (Keyboards.Count == 1 && IgnoreIfSingleInstance.Count > 0)
-                    return !IsIgnoredKeyboard(Keyboards.Cast<ManagementBaseObject>().First());
-                else
-                    return true;
+                if (Keyboards.Count == 1)
+                {
+                    switch (IgnoreOptions)
+                    {
+                        case HardwareKeyboardIgnoreOptions.IgnoreAll:
+                            return false;
+                        case HardwareKeyboardIgnoreOptions.IgnoreIfSingleInstance:
+                            return false;
+                        case HardwareKeyboardIgnoreOptions.IgnoreIfSingleInstanceOnList:
+                            return !IsIgnoredKeyboard(Keyboards.Cast<ManagementBaseObject>().First());
+                        default:
+                            return true;
+                    }
+                }
+
+                return false;
             });
 
 #pragma warning disable 4014
@@ -53,6 +89,8 @@ namespace WPFTabTip
 
             return IgnoreIfSingleInstance.Contains(description);
         }
+
+        internal static HardwareKeyboardIgnoreOptions IgnoreOptions = HardwareKeyboardIgnoreOptions.DoNotIgnore;
 
         /// <summary>
         /// Description of keyboards to ignore if there is only one instance of given keyboard.
