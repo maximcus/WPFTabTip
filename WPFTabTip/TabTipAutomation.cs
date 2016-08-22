@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace WPFTabTip
@@ -44,7 +41,9 @@ namespace WPFTabTip
                 .Where(_ => IgnoreHardwareKeyboard || !HardwareKeyboard.IsConnectedAsync().Result)
                 .Throttle(TimeSpan.FromMilliseconds(100)) // Close only if no other UIElement got focus in 100 ms
                 .Where(tuple => tuple.Item2 == false)
-                .Subscribe(_ => TabTip.Close());
+                .Do(_ => TabTip.Close())
+                .ObserveOnDispatcher()
+                .Subscribe(_ => AnimationHelper.GetEverythingInToWorkAreaWithTabTipClosed());
         }
 
         private static void AutomateTabTipOpen(IObservable<Tuple<UIElement, bool>> FocusObservable)
@@ -53,7 +52,7 @@ namespace WPFTabTip
                 .ObserveOn(Scheduler.Default)
                 .Where(_ => IgnoreHardwareKeyboard || !HardwareKeyboard.IsConnectedAsync().Result)
                 .Where(tuple => tuple.Item2 == true)
-                .Do(_ => TabTip.OpenAndStartPoolingForClosedEvent())
+                .Do(_ => TabTip.OpenUndockedAndStartPoolingForClosedEvent())
                 .ObserveOnDispatcher()
                 .Subscribe(tuple => AnimationHelper.GetUIElementInToWorkAreaWithTabTipOpened(tuple.Item1));
         }
