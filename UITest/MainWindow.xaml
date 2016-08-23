@@ -6,7 +6,21 @@
         xmlns:local="clr-namespace:UITest"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
+    <Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <RichTextBox Grid.ColumnSpan="3" InputScope="Url"/>
+        <Button Grid.Row="1" Content="Do Nothing"/>
+        <Button Grid.Row="1" x:Name="btn_NewWindow" Content="New Window" Grid.Column="1" Click="btn_NewWindow_OnClick"/>
+        <Button Grid.Row="1" x:Name="btn_KeyboardDescriptions" Content="Get Keyboard Descriptions" Grid.Column="2" Click="btn_KeyboardDescriptions_OnClick"/>
+        <TextBox Grid.Row="2" Grid.ColumnSpan="3" InputScope="Number"/>
     </Grid>
 </Window>
