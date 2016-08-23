@@ -11,6 +11,9 @@ namespace WPFTabTip
     {
         static TabTipAutomation()
         {
+            if (EnvironmentEx.GetOSVersion() == OSVersion.Win7)
+                return;
+
             TabTip.Closed += () => TabTipClosedSubject.OnNext(true);
 
             AutomateTabTipOpen(FocusSubject.AsObservable());
@@ -72,6 +75,9 @@ namespace WPFTabTip
         /// <typeparam name="T"></typeparam>
         public static void BindTo<T>() where T : UIElement
         {
+            if (EnvironmentEx.GetOSVersion() == OSVersion.Win7)
+                return;
+
             if (BindedUIElements.Contains(typeof(T)))
                 return;
 
