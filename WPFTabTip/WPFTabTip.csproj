@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnimationHelper.cs" />
+    <Compile Include="EnvironmentEx.cs" />
     <Compile Include="HardwareKeyboard.cs" />
     <Compile Include="PoolingTimer.cs" />
     <Compile Include="Screen.cs" />

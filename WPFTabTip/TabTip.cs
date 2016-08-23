@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 
 namespace WPFTabTip
@@ -11,7 +12,8 @@ namespace WPFTabTip
     {
         private const string tabTipWindowClassName = "IPTip_Main_Window";
         private const string TabTipExecPath = @"C:\Program Files\Common Files\microsoft shared\ink\TabTip.exe";
-        
+        private const string TabTipRegistryKeyName = @"HKEY_CURRENT_USER\Software\Microsoft\TabletTip\1.7";
+
         [DllImport("user32.dll")]
         private static extern int SendMessage(int hWnd, uint Msg, int wParam, int lParam);
 
@@ -51,14 +53,28 @@ namespace WPFTabTip
         /// <summary>
         /// Open TabTip
         /// </summary>
-        public static void Open() => Process.Start(TabTipExecPath);
+        public static void Open()
+        {
+            if (EnvironmentEx.GetOSVersion() == OSVersion.Win10)
+                EnableTabTipOpenInDesctopModeOnWin10();
+
+            Process.Start(TabTipExecPath);
+        }
+
+        private static void EnableTabTipOpenInDesctopModeOnWin10()
+        {
+            const string TabTipAutoInvokeKey = "EnableDesktopModeAutoInvoke";
+
+            int EnableDesktopModeAutoInvoke = (int) Registry.GetValue(TabTipRegistryKeyName, TabTipAutoInvokeKey, -1);
+            if (EnableDesktopModeAutoInvoke != 1)
+                Registry.SetValue(TabTipRegistryKeyName, TabTipAutoInvokeKey, 1);
+        }
 
         /// <summary>
         /// Open TabTip in undocked state
         /// </summary>
         public static void OpenUndocked()
         {
-            const string TabTipRegistryKeyName = @"HKEY_CURRENT_USER\Software\Microsoft\TabletTip\1.7";
             const string TabTipDockedKey = "EdgeTargetDockedState";
             const string TabTipProcessName = "TabTip";
 
@@ -127,12 +143,24 @@ namespace WPFTabTip
             RECT rect;
 
             if (!GetWindowRect(new HandleRef(null, GetTabTipWindowHandle()), out rect))
+            {
+                if (EnvironmentEx.GetOSVersion() == OSVersion.Win10) //in case TabTip was closed
+                    Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(TryGetTabTipRectangleToСache);
+
                 return previousTabTipRectangle;
+            }
 
             Rectangle wouldBeTabTipRectangle = new Rectangle(x: rect.Left, y: rect.Top, width: rect.Right - rect.Left + 1, height: rect.Bottom - rect.Top + 1);
             previousTabTipRectangle = wouldBeTabTipRectangle;
 
             return wouldBeTabTipRectangle;
+        }
+
+        private static void TryGetTabTipRectangleToСache(Task task)
+        {
+            RECT rect;
+            if (GetWindowRect(new HandleRef(null, GetTabTipWindowHandle()), out rect))
+                previousTabTipRectangle = new Rectangle(x: rect.Left, y: rect.Top, width: rect.Right - rect.Left + 1, height: rect.Bottom - rect.Top + 1);
         }
     }
 }
