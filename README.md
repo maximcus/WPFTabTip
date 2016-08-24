@@ -1,5 +1,5 @@
 # WPFTabTip
-Simple TabTip / OSK / Virtual Keyboard integration for WPF apps on Win 8.1 and Win 10
+Simple TabTip / Virtual Keyboard integration for WPF apps on Win 8.1 and Win 10
 
 ## Simple to use
 
