@@ -144,7 +144,7 @@ namespace WPFTabTip
 
             if (!GetWindowRect(new HandleRef(null, GetTabTipWindowHandle()), out rect))
             {
-                if (EnvironmentEx.GetOSVersion() == OSVersion.Win10) //in case TabTip was closed
+                if (previousTabTipRectangle.Equals(new Rectangle())) //in case TabTip was closed and previousTabTipRectangle was not set
                     Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(TryGetTabTipRectangleToСache);
 
                 return previousTabTipRectangle;
