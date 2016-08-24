@@ -3,6 +3,12 @@ Simple TabTip / OSK / Virtual Keyboard integration for WPF apps on Win 8.1 and W
 
 ## Simple to use
 
+The easiest way to install the WPFTabTip is using the [Package Manager Console](https://docs.NuGet.org/consume/package-manager-console) in Visual Studio:
+
+~~~powershell
+PM> Install-Package WPFTabTip
+~~~
+
 One line of code in your startup logic, and you good to go!
 
 ```c#
