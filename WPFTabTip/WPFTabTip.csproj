@@ -78,9 +78,6 @@
     <Compile Include="Taskbar.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="dependencies.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
