@@ -65,7 +65,7 @@ namespace WPFTabTip
         {
             const string TabTipAutoInvokeKey = "EnableDesktopModeAutoInvoke";
 
-            int EnableDesktopModeAutoInvoke = (int) Registry.GetValue(TabTipRegistryKeyName, TabTipAutoInvokeKey, -1);
+            int EnableDesktopModeAutoInvoke = (int) (Registry.GetValue(TabTipRegistryKeyName, TabTipAutoInvokeKey, -1) ?? -1);
             if (EnableDesktopModeAutoInvoke != 1)
                 Registry.SetValue(TabTipRegistryKeyName, TabTipAutoInvokeKey, 1);
         }
@@ -78,7 +78,7 @@ namespace WPFTabTip
             const string TabTipDockedKey = "EdgeTargetDockedState";
             const string TabTipProcessName = "TabTip";
 
-            int docked = (int)Registry.GetValue(TabTipRegistryKeyName, TabTipDockedKey, 0);
+            int docked = (int) (Registry.GetValue(TabTipRegistryKeyName, TabTipDockedKey, 1) ?? 1);
             if (docked == 1)
             {
                 Registry.SetValue(TabTipRegistryKeyName, TabTipDockedKey, 0);
