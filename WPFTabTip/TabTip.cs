@@ -43,22 +43,41 @@ namespace WPFTabTip
         internal static event Action Closed;
 
         private static IntPtr GetTabTipWindowHandle() => FindWindow(tabTipWindowClassName, null);
-        
-        internal static void OpenUndockedAndStartPoolingForClosedEvent()
+
+        internal static void OpenAndStartPoolingForClosedEvent(TabTipAutomation.DockModeOptions dockMode)
         {
-            OpenUndocked();
+            Open(dockMode);
             StartPoolingForTabTipClosedEvent();
         }
 
         /// <summary>
         /// Open TabTip
         /// </summary>
-        public static void Open()
+        public static void Open(TabTipAutomation.DockModeOptions dockMode = TabTipAutomation.DockModeOptions.NoChange)
         {
+            const string TabTipDockedKey = "EdgeTargetDockedState";
+            const string TabTipProcessName = "TabTip";
+
+            if (dockMode != TabTipAutomation.DockModeOptions.NoChange)
+            {
+                int currentDockValue = (int)(Registry.GetValue(TabTipRegistryKeyName, TabTipDockedKey, 1) ?? 1);
+                int expectedDockValue = dockMode == TabTipAutomation.DockModeOptions.Docked ? 1 : 0;
+
+                if (currentDockValue != expectedDockValue)
+                {
+                    Registry.SetValue(TabTipRegistryKeyName, TabTipDockedKey, expectedDockValue);
+                    foreach (Process tabTipProcess in Process.GetProcessesByName(TabTipProcessName))
+                        tabTipProcess.Kill();
+                }
+            }
+
             if (EnvironmentEx.GetOSVersion() == OSVersion.Win10)
                 EnableTabTipOpenInDesctopModeOnWin10();
 
             Process.Start(TabTipExecPath);
+
+            if (EnvironmentEx.GetOSVersion() == OSVersion.Win10)
+                TrayIcon.Trigger();
         }
 
         private static void EnableTabTipOpenInDesctopModeOnWin10()
@@ -75,17 +94,7 @@ namespace WPFTabTip
         /// </summary>
         public static void OpenUndocked()
         {
-            const string TabTipDockedKey = "EdgeTargetDockedState";
-            const string TabTipProcessName = "TabTip";
-
-            int docked = (int) (Registry.GetValue(TabTipRegistryKeyName, TabTipDockedKey, 1) ?? 1);
-            if (docked == 1)
-            {
-                Registry.SetValue(TabTipRegistryKeyName, TabTipDockedKey, 0);
-                foreach (Process tabTipProcess in Process.GetProcessesByName(TabTipProcessName))
-                    tabTipProcess.Kill();
-            }
-            Open();
+            Open(TabTipAutomation.DockModeOptions.Undocked);
         }
 
         /// <summary>

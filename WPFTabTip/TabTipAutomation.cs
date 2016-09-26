@@ -25,6 +25,24 @@ namespace WPFTabTip
 
         private static readonly List<Type> BindedUIElements = new List<Type>();
 
+        public enum DockModeOptions
+        {
+            /// <summary>
+            /// Dock the keyboard to the taskbar.
+            /// </summary>
+            Docked,
+
+            /// <summary>
+            /// Undock the keyboard (floating window).
+            /// </summary>
+            Undocked,
+
+            /// <summary>
+            /// Do not change the docking behaviour.
+            /// </summary>
+            NoChange
+        }
+
         /// <summary>
         /// By default TabTip automation happens only when no keyboard is connected to device.
         /// Change IgnoreHardwareKeyboard if you want to automate
@@ -35,6 +53,8 @@ namespace WPFTabTip
             get { return HardwareKeyboard.IgnoreOptions; }
             set { HardwareKeyboard.IgnoreOptions = value; } 
         }
+
+        public static DockModeOptions DockingMode { get; set; } = DockModeOptions.Undocked;
 
         /// <summary>
         /// Description of keyboards to ignore if there is only one instance of given keyboard.
@@ -63,7 +83,7 @@ namespace WPFTabTip
                 .ObserveOn(Scheduler.Default)
                 .Where(_ => IgnoreHardwareKeyboard == HardwareKeyboardIgnoreOptions.IgnoreAll || !HardwareKeyboard.IsConnectedAsync().Result)
                 .Where(tuple => tuple.Item2 == true)
-                .Do(_ => TabTip.OpenUndockedAndStartPoolingForClosedEvent())
+                .Do(_ => TabTip.OpenAndStartPoolingForClosedEvent(DockingMode))
                 .ObserveOnDispatcher()
                 .Subscribe(tuple => AnimationHelper.GetUIElementInToWorkAreaWithTabTipOpened(tuple.Item1));
         }
