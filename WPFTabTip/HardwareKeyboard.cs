@@ -29,6 +29,12 @@ namespace WPFTabTip
         IgnoreAll
     }
 
+    public enum PopupOptions
+    {
+        NoPopupOnTap,
+        PopupOnTap = 1    
+    }
+
     internal static class HardwareKeyboard
     {
         private static bool? _isConnected;
