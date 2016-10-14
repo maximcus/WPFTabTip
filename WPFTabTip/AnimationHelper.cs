@@ -298,11 +298,13 @@ namespace WPFTabTip
                 Window window = moveRootVisualStoryboard.Key as Window;
                 // if window exist also check if it has not been closed
                 if (window != null && new WindowInteropHelper(window).Handle != IntPtr.Zero)
-                {
-                    MoveRootVisualBy(window, GetYOffsetToMoveUIElementInToWorkArea(GetWindowRectangle(window), GetWorkAreaWithTabTipClosed(window)));
-                }
+                    MoveRootVisualBy(
+                        rootVisual: window,
+                        moveBy: GetYOffsetToMoveUIElementInToWorkArea(
+                            uiElementRectangle: GetWindowRectangle(window),
+                            workAreaRectangle: GetWorkAreaWithTabTipClosed(window)));
                 else
-                    MoveRootVisualTo(moveRootVisualStoryboard.Key, 0);
+                    MoveRootVisualTo(rootVisual: moveRootVisualStoryboard.Key, moveTo: 0);
             }
         } 
 
