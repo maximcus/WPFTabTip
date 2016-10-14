@@ -71,12 +71,11 @@ namespace WPFTabTip
 
         /// <summary>
         /// Automate TabTip for given UIElement.
-        /// Keyboard opens and closes on GotFocusEvent and LostFocusEvent respectively.
-        /// 
+        /// Keyboard opens on GotFocusEvent or TouchDownEvent (if focused already) 
+        /// and closes on LostFocusEvent.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="popupOptions">Set to PopupOnTap if you want softkeyboard to popup on finger tap (not only when receiving focus) Useful if you want to edit a text after closing soft-keyboard.</param>
-        public static void BindTo<T>(PopupOptions popupOptions = PopupOptions.NoPopupOnTap) where T : UIElement
+        public static void BindTo<T>() where T : UIElement
         {
             if (EnvironmentEx.GetOSVersion() == OSVersion.Win7)
                 return;
@@ -85,19 +84,20 @@ namespace WPFTabTip
                 return;
 
             EventManager.RegisterClassHandler(
+                classType: typeof(T),
+                routedEvent: UIElement.TouchDownEvent,
+                handler: new RoutedEventHandler((s, e) =>
+                {
+                    if (((UIElement)s).IsFocused)
+                        FocusSubject.OnNext(new Tuple<UIElement, bool>((UIElement)s, true));
+                }),
+                handledEventsToo: true);
+
+            EventManager.RegisterClassHandler(
                 classType: typeof(T), 
                 routedEvent: UIElement.GotFocusEvent, 
                 handler: new RoutedEventHandler((s, e) => FocusSubject.OnNext(new Tuple<UIElement, bool>((UIElement) s, true))), 
                 handledEventsToo: true);
-
-            if (popupOptions == PopupOptions.PopupOnTap)
-            {
-                EventManager.RegisterClassHandler(
-                    classType: typeof(T),
-                    routedEvent: UIElement.TouchDownEvent,
-                    handler: new RoutedEventHandler((s, e) => FocusSubject.OnNext(new Tuple<UIElement, bool>((UIElement) s, true))),
-                    handledEventsToo: true);
-            }
 
             EventManager.RegisterClassHandler(
                 classType: typeof(T), 

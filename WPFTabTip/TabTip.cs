@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Win32;
@@ -10,12 +11,11 @@ namespace WPFTabTip
 {
     public static class TabTip
     {
-        private const string tabTipWindowClassName = "IPTip_Main_Window";
-        private const string TabTipExecPath = @"C:\Program Files\Common Files\microsoft shared\ink\TabTip.exe";
+        private const string TabTipWindowClassName = "IPTip_Main_Window";
         private const string TabTipRegistryKeyName = @"HKEY_CURRENT_USER\Software\Microsoft\TabletTip\1.7";
 
         [DllImport("user32.dll")]
-        private static extern int SendMessage(int hWnd, uint Msg, int wParam, int lParam);
+        private static extern int SendMessage(int hWnd, uint msg, int wParam, int lParam);
 
         [DllImport("user32.dll")]
         private static extern IntPtr FindWindow(String sClassName, String sAppName);
@@ -42,7 +42,7 @@ namespace WPFTabTip
         /// </summary>
         internal static event Action Closed;
 
-        private static IntPtr GetTabTipWindowHandle() => FindWindow(tabTipWindowClassName, null);
+        private static IntPtr GetTabTipWindowHandle() => FindWindow(TabTipWindowClassName, null);
         
         internal static void OpenUndockedAndStartPoolingForClosedEvent()
         {
@@ -50,6 +50,25 @@ namespace WPFTabTip
             StartPoolingForTabTipClosedEvent();
         }
 
+
+        private static string _keyboardPath;
+        private static string KeyboardPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_keyboardPath))
+                {
+                    _keyboardPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles),
+                        @"Microsoft Shared\ink\TabTip.exe");
+                    if (!File.Exists(_keyboardPath))
+                    {
+                        // older windows versions
+                        _keyboardPath = Environment.GetFolderPath(Environment.SpecialFolder.System) + @"\osk.exe";
+                    }
+                }
+                return _keyboardPath;
+            }
+        }
         /// <summary>
         /// Open TabTip
         /// </summary>
@@ -58,7 +77,7 @@ namespace WPFTabTip
             if (EnvironmentEx.GetOSVersion() == OSVersion.Win10)
                 EnableTabTipOpenInDesctopModeOnWin10();
 
-            Process.Start(TabTipExecPath);
+            Process.Start(KeyboardPath);
         }
 
         private static void EnableTabTipOpenInDesctopModeOnWin10()

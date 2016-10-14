@@ -13,12 +13,6 @@ namespace WPFTabTip
 
         public Screen(Window window)
         {
-            // Previously this function would often close if focus was lost when popping up a messagebox then closing form
-            
-            // Use Handle instead of EnsureHandle as latter will crash if window has been closed 
-            // Should not get here if that is the case due to check in GetEverythingInToWorkAreaWithTabTipClosed(), 
-            // but I feel EnsureHandle should not be used here regardless and it is a safeguard
-
             IntPtr windowHandle = new WindowInteropHelper(window).Handle;
             
             IntPtr monitor = NativeMethods.MonitorFromWindow(windowHandle, NativeMethods.MONITOR_DEFAULTTONEAREST);

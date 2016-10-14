@@ -65,9 +65,9 @@ namespace WPFTabTip
         {
             Rectangle workAreaWithTabTipClosed = GetWorkAreaWithTabTipClosed(element);
 
-            int TabTipRectangleTop = TabTip.GetWouldBeTabTipRectangle().ToRectangleInLogicalUnits(element).Top;
+            int tabTipRectangleTop = TabTip.GetWouldBeTabTipRectangle().ToRectangleInLogicalUnits(element).Top;
 
-            int bottom = (TabTipRectangleTop == 0) ? workAreaWithTabTipClosed.Bottom / 2 : TabTipRectangleTop; // in case TabTip is not yet opened
+            int bottom = (tabTipRectangleTop == 0) ? workAreaWithTabTipClosed.Bottom / 2 : tabTipRectangleTop; // in case TabTip is not yet opened
 
             return Rectangle.FromLTRB(
                 left: workAreaWithTabTipClosed.Left,
@@ -145,49 +145,50 @@ namespace WPFTabTip
             }
         }
 
-        private static Storyboard GetOrCreateMoveRootVisualStoryboard(FrameworkElement VisualRoot)
+        private static Storyboard GetOrCreateMoveRootVisualStoryboard(FrameworkElement visualRoot)
         {
-            if (MoveRootVisualStoryboards.ContainsKey(VisualRoot))
-                return MoveRootVisualStoryboards[VisualRoot];
+            if (MoveRootVisualStoryboards.ContainsKey(visualRoot))
+                return MoveRootVisualStoryboards[visualRoot];
             else
-                return CreateMoveRootVisualStoryboard(VisualRoot);
+                return CreateMoveRootVisualStoryboard(visualRoot);
         }
 
-        private static Storyboard CreateMoveRootVisualStoryboard(FrameworkElement VisualRoot)
+        private static Storyboard CreateMoveRootVisualStoryboard(FrameworkElement visualRoot)
         {
-            Storyboard MoveRootVisualStoryboard = new Storyboard
+            Storyboard moveRootVisualStoryboard = new Storyboard
             {
                 Duration = new Duration(TimeSpan.FromSeconds(0.35))
             };
 
-            DoubleAnimation MoveAnimation = new DoubleAnimation
+            DoubleAnimation moveAnimation = new DoubleAnimation
             {
                 EasingFunction = new CircleEase {EasingMode = EasingMode.EaseOut},
                 Duration = new Duration(TimeSpan.FromSeconds(0.35)),
-                FillBehavior = (VisualRoot is Window) ? FillBehavior.Stop : FillBehavior.HoldEnd
+                FillBehavior = (visualRoot is Window) ? FillBehavior.Stop : FillBehavior.HoldEnd
             };
 
-            MoveRootVisualStoryboard.Children.Add(MoveAnimation);
+            moveRootVisualStoryboard.Children.Add(moveAnimation);
 
-            if (!(VisualRoot is Window))
-                VisualRoot.RenderTransform = new TranslateTransform();
+            if (!(visualRoot is Window))
+                visualRoot.RenderTransform = new TranslateTransform();
 
-            Storyboard.SetTarget(MoveAnimation, VisualRoot);
+            Storyboard.SetTarget(moveAnimation, visualRoot);
             Storyboard.SetTargetProperty(
-                element: MoveAnimation,
-                path: (VisualRoot is Window) ? new PropertyPath("Top") : new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+                element: moveAnimation,
+                path: (visualRoot is Window) ? new PropertyPath("Top") : new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
 
-            MoveRootVisualStoryboards.Add(VisualRoot, MoveRootVisualStoryboard);
-            SubscribeToWindowStateChangedToMoveRootVisual(VisualRoot);
+            MoveRootVisualStoryboards.Add(visualRoot, moveRootVisualStoryboard);
+            SubscribeToWindowStateChangedToMoveRootVisual(visualRoot);
 
-            return MoveRootVisualStoryboard;
+            return moveRootVisualStoryboard;
         }
 
-        private static void SubscribeToWindowStateChangedToMoveRootVisual(FrameworkElement VisualRoot)
+        private static void SubscribeToWindowStateChangedToMoveRootVisual(FrameworkElement visualRoot)
         {
-            if (VisualRoot is Window)
+            var root = visualRoot as Window;
+            if (root != null)
             {
-                Window window = (Window) VisualRoot;
+                Window window = root;
 
                 window.StateChanged += (sender, args) =>
                 {
@@ -201,12 +202,12 @@ namespace WPFTabTip
             }
             else
             {
-                Window window = Window.GetWindow(VisualRoot);
+                Window window = Window.GetWindow(visualRoot);
                 if (window != null)
                     window.StateChanged += (sender, args) =>
                     {
                         if (window.WindowState == WindowState.Normal)
-                            MoveRootVisualTo(VisualRoot, 0);
+                            MoveRootVisualTo(visualRoot, 0);
                     };
             }
         }
@@ -216,35 +217,40 @@ namespace WPFTabTip
             if (moveBy == 0)
                 return;
 
-            Storyboard MoveRootVisualStoryboard = GetOrCreateMoveRootVisualStoryboard(rootVisual);
+            Storyboard moveRootVisualStoryboard = GetOrCreateMoveRootVisualStoryboard(rootVisual);
 
-            DoubleAnimation doubleAnimation = MoveRootVisualStoryboard.Children.First() as DoubleAnimation;
+            DoubleAnimation doubleAnimation = moveRootVisualStoryboard.Children.First() as DoubleAnimation;
 
             if (doubleAnimation != null)
-                if (rootVisual is Window)
+            {
+                var window = rootVisual as Window;
+                if (window != null)
                 {
-                    doubleAnimation.From = ((Window) rootVisual).Top;
-                    doubleAnimation.To = ((Window) rootVisual).Top + moveBy;
+                    doubleAnimation.From = window.Top;
+                    doubleAnimation.To = window.Top + moveBy;
                 }
                 else
                 {
                     doubleAnimation.From = doubleAnimation.To ?? 0;
                     doubleAnimation.To = (doubleAnimation.To ?? 0) + moveBy;
                 }
+            }
 
-            MoveRootVisualStoryboard.Begin();
+            moveRootVisualStoryboard.Begin();
         }
 
         private static void MoveRootVisualTo(FrameworkElement rootVisual, double moveTo)
         {
-            Storyboard MoveRootVisualStoryboard = GetOrCreateMoveRootVisualStoryboard(rootVisual);
+            Storyboard moveRootVisualStoryboard = GetOrCreateMoveRootVisualStoryboard(rootVisual);
 
-            DoubleAnimation doubleAnimation = MoveRootVisualStoryboard.Children.First() as DoubleAnimation;
+            DoubleAnimation doubleAnimation = moveRootVisualStoryboard.Children.First() as DoubleAnimation;
 
             if (doubleAnimation != null)
-                if (rootVisual is Window)
+            {
+                var window = rootVisual as Window;
+                if (window != null)
                 {
-                    doubleAnimation.From = ((Window)rootVisual).Top;
+                    doubleAnimation.From = window.Top;
                     doubleAnimation.To = moveTo;
                 }
                 else
@@ -252,8 +258,9 @@ namespace WPFTabTip
                     doubleAnimation.From = doubleAnimation.To ?? 0;
                     doubleAnimation.To = moveTo;
                 }
+            }
 
-            MoveRootVisualStoryboard.Begin();
+            moveRootVisualStoryboard.Begin();
         }
 
         internal static void GetUIElementInToWorkAreaWithTabTipOpened(UIElement element)
@@ -298,11 +305,13 @@ namespace WPFTabTip
                 Window window = moveRootVisualStoryboard.Key as Window;
                 // if window exist also check if it has not been closed
                 if (window != null && new WindowInteropHelper(window).Handle != IntPtr.Zero)
-                {
-                    MoveRootVisualBy(window, GetYOffsetToMoveUIElementInToWorkArea(GetWindowRectangle(window), GetWorkAreaWithTabTipClosed(window)));
-                }
+                    MoveRootVisualBy(
+                        rootVisual: window,
+                        moveBy: GetYOffsetToMoveUIElementInToWorkArea(
+                            uiElementRectangle: GetWindowRectangle(window),
+                            workAreaRectangle: GetWorkAreaWithTabTipClosed(window)));
                 else
-                    MoveRootVisualTo(moveRootVisualStoryboard.Key, 0);
+                    MoveRootVisualTo(rootVisual: moveRootVisualStoryboard.Key, moveTo: 0);
             }
         } 
 
