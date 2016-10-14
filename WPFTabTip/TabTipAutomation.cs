@@ -36,15 +36,16 @@ namespace WPFTabTip
             set { HardwareKeyboard.IgnoreOptions = value; } 
         }
 
+        
         /// <summary>
         /// Description of keyboards to ignore if there is only one instance of given keyboard.
         /// If you want to ignore some ghost keyboard, add it's description to this list
         /// </summary>
         public static List<string> ListOfHardwareKeyboardsToIgnoreIfSingleInstance => HardwareKeyboard.IgnoreIfSingleInstance;
 
-        private static void AutomateTabTipClose(IObservable<Tuple<UIElement, bool>> FocusObservable, Subject<bool> tabTipClosedSubject)
+        private static void AutomateTabTipClose(IObservable<Tuple<UIElement, bool>> focusObservable, Subject<bool> tabTipClosedSubject)
         {
-            FocusObservable
+            focusObservable
                 .ObserveOn(Scheduler.Default)
                 .Where(_ => IgnoreHardwareKeyboard == HardwareKeyboardIgnoreOptions.IgnoreAll || !HardwareKeyboard.IsConnectedAsync().Result)
                 .Throttle(TimeSpan.FromMilliseconds(100)) // Close only if no other UIElement got focus in 100 ms
@@ -57,9 +58,9 @@ namespace WPFTabTip
                 .Subscribe(_ => AnimationHelper.GetEverythingInToWorkAreaWithTabTipClosed());
         }
 
-        private static void AutomateTabTipOpen(IObservable<Tuple<UIElement, bool>> FocusObservable)
+        private static void AutomateTabTipOpen(IObservable<Tuple<UIElement, bool>> focusObservable)
         {
-            FocusObservable
+            focusObservable
                 .ObserveOn(Scheduler.Default)
                 .Where(_ => IgnoreHardwareKeyboard == HardwareKeyboardIgnoreOptions.IgnoreAll || !HardwareKeyboard.IsConnectedAsync().Result)
                 .Where(tuple => tuple.Item2 == true)
@@ -71,9 +72,11 @@ namespace WPFTabTip
         /// <summary>
         /// Automate TabTip for given UIElement.
         /// Keyboard opens and closes on GotFocusEvent and LostFocusEvent respectively.
+        /// 
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public static void BindTo<T>() where T : UIElement
+        /// <param name="popupOptions">Set to PopupOnTap if you want softkeyboard to popup on finger tap (not only when receiving focus) Useful if you want to edit a text after closing soft-keyboard.</param>
+        public static void BindTo<T>(PopupOptions popupOptions = PopupOptions.NoPopupOnTap) where T : UIElement
         {
             if (EnvironmentEx.GetOSVersion() == OSVersion.Win7)
                 return;
@@ -86,6 +89,16 @@ namespace WPFTabTip
                 routedEvent: UIElement.GotFocusEvent, 
                 handler: new RoutedEventHandler((s, e) => FocusSubject.OnNext(new Tuple<UIElement, bool>((UIElement) s, true))), 
                 handledEventsToo: true);
+
+            if (popupOptions == PopupOptions.PopupOnTap)
+            {
+                EventManager.RegisterClassHandler(
+                    classType: typeof(T),
+                    routedEvent: UIElement.TouchDownEvent,
+                    handler: new RoutedEventHandler((s, e) => FocusSubject.OnNext(new Tuple<UIElement, bool>((UIElement) s, true))),
+                    handledEventsToo: true);
+            }
+
             EventManager.RegisterClassHandler(
                 classType: typeof(T), 
                 routedEvent: UIElement.LostFocusEvent, 
