@@ -51,17 +51,21 @@ namespace WPFTabTip
                 hWnd = taskbarHandle
             };
             IntPtr result = Shell32.SHAppBarMessage(ABM.GetTaskbarPos, ref data);
-            if (result == IntPtr.Zero)
-                throw new InvalidOperationException();
+            if (result != IntPtr.Zero)
+            {
+                Position = (TaskbarPosition) data.uEdge;
+                Bounds = Rectangle.FromLTRB(data.rc.left, data.rc.top, data.rc.right, data.rc.bottom);
 
-            Position = (TaskbarPosition)data.uEdge;
-            Bounds = Rectangle.FromLTRB(data.rc.left, data.rc.top, data.rc.right, data.rc.bottom);
-
-            data.cbSize = (uint)Marshal.SizeOf(typeof(APPBARDATA));
-            result = Shell32.SHAppBarMessage(ABM.GetState, ref data);
-            int state = result.ToInt32();
-            AlwaysOnTop = (state & ABS.AlwaysOnTop) == ABS.AlwaysOnTop;
-            AutoHide = (state & ABS.Autohide) == ABS.Autohide;
+                data.cbSize = (uint) Marshal.SizeOf(typeof(APPBARDATA));
+                result = Shell32.SHAppBarMessage(ABM.GetState, ref data);
+                int state = result.ToInt32();
+                AlwaysOnTop = (state & ABS.AlwaysOnTop) == ABS.AlwaysOnTop;
+                AutoHide = (state & ABS.Autohide) == ABS.Autohide;
+            }
+            else
+            {
+                Position = TaskbarPosition.Unknown;
+            }
         }
 
         private enum ABM : uint
