@@ -185,10 +185,10 @@ namespace WPFTabTip
 
         private static void SubscribeToWindowStateChangedToMoveRootVisual(FrameworkElement visualRoot)
         {
-            var root = visualRoot as Window;
-            if (root != null)
+            // ReSharper disable once CanBeReplacedWithTryCastAndCheckForNull
+            if (visualRoot is Window)
             {
-                Window window = root;
+                Window window = (Window)visualRoot;
 
                 window.StateChanged += (sender, args) =>
                 {
@@ -223,7 +223,7 @@ namespace WPFTabTip
 
             if (doubleAnimation != null)
             {
-                var window = rootVisual as Window;
+                Window window = rootVisual as Window;
                 if (window != null)
                 {
                     doubleAnimation.From = window.Top;
@@ -247,7 +247,7 @@ namespace WPFTabTip
 
             if (doubleAnimation != null)
             {
-                var window = rootVisual as Window;
+                Window window = rootVisual as Window;
                 if (window != null)
                 {
                     doubleAnimation.From = window.Top;
