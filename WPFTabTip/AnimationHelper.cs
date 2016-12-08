@@ -129,7 +129,8 @@ namespace WPFTabTip
             const int paddingTop = 30;
             const int paddingBottom = 10;
 
-            if (workAreaRectangle.Contains(uiElementRectangle))                                    // UIElement is in work area
+            if (uiElementRectangle.Top >= workAreaRectangle.Top &&
+                uiElementRectangle.Bottom <= workAreaRectangle.Bottom)                             // UIElement is in work area
                 return noOffset;
 
             if (uiElementRectangle.Top < workAreaRectangle.Top)                                    // Top of UIElement higher than work area
