@@ -91,7 +91,7 @@ namespace WPFTabTip
             const string TabTipDockedKey = "EdgeTargetDockedState";
             const string TabTipProcessName = "TabTip";
 
-            int docked = (int) (Registry.GetValue(TabTipRegistryKeyName, TabTipDockedKey, 1) ?? 1);
+            int docked = (int) (Registry.GetValue(TabTipRegistryKeyName, TabTipDockedKey, 1) ?? -1);
             if (docked != (int)TabTipAutomation.PopupMode)
             {
                 Registry.SetValue(TabTipRegistryKeyName, TabTipDockedKey, (int)TabTipAutomation.PopupMode);
