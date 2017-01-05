@@ -8,6 +8,19 @@ using Microsoft.Win32;
 
 namespace WPFTabTip
 {
+    public enum PopupOptions
+    {
+        /// <summary>
+        /// Keyboard open in floating mode,
+        /// </summary>
+        Floating = 0,
+
+        /// <summary>
+        /// Keyboard open in docked mode,
+        /// </summary>
+        Docked = 1
+    }
+
     public static class TabTip
     {
         private const string TabTipWindowClassName = "IPTip_Main_Window";
@@ -44,9 +57,9 @@ namespace WPFTabTip
 
         private static IntPtr GetTabTipWindowHandle() => FindWindow(TabTipWindowClassName, null);
         
-        internal static void OpenUndockedAndStartPoolingForClosedEvent()
+        internal static void OpenAndStartPoolingForClosedEvent()
         {
-            OpenUndocked();
+            OpenKeyboard();
             StartPoolingForTabTipClosedEvent();
         }
 
@@ -73,15 +86,15 @@ namespace WPFTabTip
         /// <summary>
         /// Open TabTip in undocked state
         /// </summary>
-        public static void OpenUndocked()
+        public static void OpenKeyboard()
         {
             const string TabTipDockedKey = "EdgeTargetDockedState";
             const string TabTipProcessName = "TabTip";
 
             int docked = (int) (Registry.GetValue(TabTipRegistryKeyName, TabTipDockedKey, 1) ?? 1);
-            if (docked == 1)
+            if (docked != (int)TabTipAutomation.PopupMode)
             {
-                Registry.SetValue(TabTipRegistryKeyName, TabTipDockedKey, 0);
+                Registry.SetValue(TabTipRegistryKeyName, TabTipDockedKey, (int)TabTipAutomation.PopupMode);
                 foreach (Process tabTipProcess in Process.GetProcessesByName(TabTipProcessName))
                     tabTipProcess.Kill();
             }

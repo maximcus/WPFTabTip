@@ -71,3 +71,9 @@ To specify keyboard layout to be used with certain element you can set `InputSco
 - Url
 - EmailSmtpAddress
 - Number
+
+## Popup Keyboard in docked Mode
+By default the keyboard is floating when popup. To dock the keyboard you can use following code:
+```c#
+TabTipAutomation.PopupMode = PopupOptions.Docked;
+```
