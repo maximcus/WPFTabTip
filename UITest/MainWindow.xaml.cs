@@ -26,19 +26,27 @@ namespace UITest
         private static void GetKeyboardDescriptions()
         {
             string tempFileName = "temp.txt";
-
-            List<string> KeyboardDescriptions = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")).Get()
-                .Cast<ManagementBaseObject>()
-                .SelectMany(keyboard =>
-                    keyboard.Properties
-                        .Cast<PropertyData>()
-                        .Where(k => k.Name == "Description")
-                        .Select(k => k.Value as string))
-                .ToList();
+            List<string> KeyboardDescriptions = QueryWmiKeyboards();
 
             File.WriteAllLines(tempFileName, KeyboardDescriptions);
 
             Process.Start(tempFileName);
+        }
+
+        private static List<string> QueryWmiKeyboards()
+        {
+            using (var searcher = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")))
+            using (var result = searcher.Get())
+            {
+                return result
+                    .Cast<ManagementBaseObject>()
+                    .SelectMany(keyboard =>
+                        keyboard.Properties
+                            .Cast<PropertyData>()
+                            .Where(k => k.Name == "Description")
+                            .Select(k => k.Value as string))
+                    .ToList();
+            }
         }
 
         private void btn_NewWindow_OnClick(object sender, RoutedEventArgs e) => new DialogWindow().Show();
