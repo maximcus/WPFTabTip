@@ -41,7 +41,7 @@ namespace WPFTabTip
         /// Description of keyboards to ignore if there is only one instance of given keyboard.
         /// If you want to ignore some ghost keyboard, add it's description to this list
         /// </summary>
-        public static List<string> ListOfHardwareKeyboardsToIgnoreIfSingleInstance => HardwareKeyboard.IgnoreIfSingleInstance;
+        public static List<string> IgnoredDevices => HardwareKeyboard.IgnoredDevices;
 
         private static void AutomateTabTipClose(IObservable<Tuple<UIElement, bool>> focusObservable, Subject<bool> tabTipClosedSubject)
         {
