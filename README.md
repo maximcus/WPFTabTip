@@ -55,7 +55,7 @@ public enum HardwareKeyboardIgnoreOptions
     }
 ```
 
- If you want to ignore specific keyboard you should set `TabTipAutomation.IgnoreHardwareKeyboard` to `IgnoreIfSingleInstanceOnList`, and add keyboard description to `TabTipAutomation.IgnoredDevices`.
+If you want to ignore specific keyboard you should set `TabTipAutomation.IgnoreHardwareKeyboard` to either `IgnoreIfSingleInstanceOnList` or `IgnoreIfInstanceOnList`, and add keyboard description to `TabTipAutomation.IgnoredDevices`.
 
 To get description of keyboards connected to machine you can use following code:
 

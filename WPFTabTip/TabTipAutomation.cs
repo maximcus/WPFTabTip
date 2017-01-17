@@ -36,9 +36,14 @@ namespace WPFTabTip
             set { HardwareKeyboard.IgnoreOptions = value; } 
         }
 
-        
         /// <summary>
         /// Description of keyboards to ignore if there is only one instance of given keyboard.
+        /// If you want to ignore some ghost keyboard, add it's description to this list
+        /// </summary>
+        public static List<string> ListOfHardwareKeyboardsToIgnoreIfSingleInstance => HardwareKeyboard.IgnoredDevices;
+
+        /// <summary>
+        /// Description of keyboards to ignore.
         /// If you want to ignore some ghost keyboard, add it's description to this list
         /// </summary>
         public static List<string> IgnoredDevices => HardwareKeyboard.IgnoredDevices;
