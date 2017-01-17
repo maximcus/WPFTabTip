@@ -302,18 +302,25 @@ namespace WPFTabTip
 
         internal static void GetEverythingInToWorkAreaWithTabTipClosed()
         {
-            foreach (KeyValuePair<FrameworkElement, Storyboard> moveRootVisualStoryboard in MoveRootVisualStoryboards)
+            try
             {
-                Window window = moveRootVisualStoryboard.Key as Window;
-                // if window exist also check if it has not been closed
-                if (window != null && new WindowInteropHelper(window).Handle != IntPtr.Zero)
-                    MoveRootVisualBy(
-                        rootVisual: window,
-                        moveBy: GetYOffsetToMoveUIElementInToWorkArea(
-                            uiElementRectangle: GetWindowRectangle(window),
-                            workAreaRectangle: GetWorkAreaWithTabTipClosed(window)));
-                else
-                    MoveRootVisualTo(rootVisual: moveRootVisualStoryboard.Key, moveTo: 0);
+                foreach (KeyValuePair<FrameworkElement, Storyboard> moveRootVisualStoryboard in MoveRootVisualStoryboards)
+                {
+                    Window window = moveRootVisualStoryboard.Key as Window;
+                    // if window exist also check if it has not been closed
+                    if (window != null && new WindowInteropHelper(window).Handle != IntPtr.Zero)
+                        MoveRootVisualBy(
+                            rootVisual: window,
+                            moveBy: GetYOffsetToMoveUIElementInToWorkArea(
+                                uiElementRectangle: GetWindowRectangle(window),
+                                workAreaRectangle: GetWorkAreaWithTabTipClosed(window)));
+                    else
+                        MoveRootVisualTo(rootVisual: moveRootVisualStoryboard.Key, moveTo: 0);
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionCatched?.Invoke(ex);
             }
         } 
 
