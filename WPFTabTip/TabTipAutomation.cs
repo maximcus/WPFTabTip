@@ -18,6 +18,7 @@ namespace WPFTabTip
 
             AutomateTabTipOpen(FocusSubject.AsObservable());
             AutomateTabTipClose(FocusSubject.AsObservable(), TabTipClosedSubject);
+            AnimationHelper.ExceptionCatched += obj => ExceptionCatched?.Invoke(obj);
         }
 
         private static readonly Subject<Tuple<UIElement, bool>> FocusSubject = new Subject<Tuple<UIElement, bool>>();
@@ -36,7 +37,7 @@ namespace WPFTabTip
             set { HardwareKeyboard.IgnoreOptions = value; } 
         }
 
-        
+        public static event Action<Exception> ExceptionCatched;
         /// <summary>
         /// Description of keyboards to ignore if there is only one instance of given keyboard.
         /// If you want to ignore some ghost keyboard, add it's description to this list

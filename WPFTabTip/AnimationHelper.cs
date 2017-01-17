@@ -16,6 +16,7 @@ namespace WPFTabTip
 
         private static Point GetCurrentUIElementPoint(Visual element) => element.PointToScreen(new Point(0, 0)).ToPointInLogicalUnits(element);
 
+        internal static event Action<Exception> ExceptionCatched;
         private static Rectangle ToRectangleInLogicalUnits(this Rectangle rectangleToConvert, DependencyObject element)
         {
             const float logicalUnitDpi = 96.0f;
@@ -286,7 +287,7 @@ namespace WPFTabTip
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                ExceptionCatched?.Invoke(ex);
             }
         }
 
