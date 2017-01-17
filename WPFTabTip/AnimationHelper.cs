@@ -16,6 +16,7 @@ namespace WPFTabTip
 
         private static Point GetCurrentUIElementPoint(Visual element) => element.PointToScreen(new Point(0, 0)).ToPointInLogicalUnits(element);
 
+        internal static event Action<Exception> ExceptionCatched;
         private static Rectangle ToRectangleInLogicalUnits(this Rectangle rectangleToConvert, DependencyObject element)
         {
             const float logicalUnitDpi = 96.0f;
@@ -286,7 +287,7 @@ namespace WPFTabTip
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                ExceptionCatched?.Invoke(ex);
             }
         }
 
@@ -301,18 +302,25 @@ namespace WPFTabTip
 
         internal static void GetEverythingInToWorkAreaWithTabTipClosed()
         {
-            foreach (KeyValuePair<FrameworkElement, Storyboard> moveRootVisualStoryboard in MoveRootVisualStoryboards)
+            try
             {
-                Window window = moveRootVisualStoryboard.Key as Window;
-                // if window exist also check if it has not been closed
-                if (window != null && new WindowInteropHelper(window).Handle != IntPtr.Zero)
-                    MoveRootVisualBy(
-                        rootVisual: window,
-                        moveBy: GetYOffsetToMoveUIElementInToWorkArea(
-                            uiElementRectangle: GetWindowRectangle(window),
-                            workAreaRectangle: GetWorkAreaWithTabTipClosed(window)));
-                else
-                    MoveRootVisualTo(rootVisual: moveRootVisualStoryboard.Key, moveTo: 0);
+                foreach (KeyValuePair<FrameworkElement, Storyboard> moveRootVisualStoryboard in MoveRootVisualStoryboards)
+                {
+                    Window window = moveRootVisualStoryboard.Key as Window;
+                    // if window exist also check if it has not been closed
+                    if (window != null && new WindowInteropHelper(window).Handle != IntPtr.Zero)
+                        MoveRootVisualBy(
+                            rootVisual: window,
+                            moveBy: GetYOffsetToMoveUIElementInToWorkArea(
+                                uiElementRectangle: GetWindowRectangle(window),
+                                workAreaRectangle: GetWorkAreaWithTabTipClosed(window)));
+                    else
+                        MoveRootVisualTo(rootVisual: moveRootVisualStoryboard.Key, moveTo: 0);
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionCatched?.Invoke(ex);
             }
         } 
 

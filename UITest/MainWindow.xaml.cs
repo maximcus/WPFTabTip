@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -21,8 +22,12 @@ namespace UITest
             TabTipAutomation.IgnoreHardwareKeyboard = HardwareKeyboardIgnoreOptions.IgnoreAll;
             TabTipAutomation.BindTo<TextBox>();
             TabTipAutomation.BindTo<RichTextBox>();
+            TabTipAutomation.ExceptionCatched += TabTipAutomationOnTest;
         }
-
+        private void TabTipAutomationOnTest(Exception exception)
+        {
+            MessageBox.Show(exception.Message);
+        }
         private static void GetKeyboardDescriptions()
         {
             string tempFileName = "temp.txt";
