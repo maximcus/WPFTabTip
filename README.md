@@ -33,7 +33,7 @@ public enum HardwareKeyboardIgnoreOptions
 
         /// <summary>
         /// Ignore keyboard, if there is only one, and it's description 
-        /// can be found in IgnoredDevices.
+        /// can be found in ListOfKeyboardsToIgnore.
         /// </summary>
         IgnoreIfSingleInstanceOnList,
 
@@ -44,9 +44,9 @@ public enum HardwareKeyboardIgnoreOptions
         
         /// <summary>
         /// Ignore all keyboards for which the description 
-        /// can be found in IgnoredDevices
+        /// can be found in ListOfKeyboardsToIgnore
         /// </summary>
-        IgnoreIfInstanceOnList,
+        IgnoreIfOnList,
 
         /// <summary>
         /// Ignore all keyboards
@@ -55,7 +55,7 @@ public enum HardwareKeyboardIgnoreOptions
     }
 ```
 
-If you want to ignore specific keyboard you should set `TabTipAutomation.IgnoreHardwareKeyboard` to either `IgnoreIfSingleInstanceOnList` or `IgnoreIfInstanceOnList`, and add keyboard description to `TabTipAutomation.IgnoredDevices`.
+If you want to ignore specific keyboard you should set `TabTipAutomation.IgnoreHardwareKeyboard` to either `IgnoreIfSingleInstanceOnList` or `IgnoreIfOnList`, and add keyboard description to `TabTipAutomation.ListOfKeyboardsToIgnore`.
 
 To get description of keyboards connected to machine you can use following code:
 
