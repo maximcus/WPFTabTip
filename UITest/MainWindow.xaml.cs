@@ -23,6 +23,8 @@ namespace UITest
             TabTipAutomation.BindTo<TextBox>();
             TabTipAutomation.BindTo<RichTextBox>();
             TabTipAutomation.ExceptionCatched += TabTipAutomationOnTest;
+
+            DataContext = this;
         }
         private void TabTipAutomationOnTest(Exception exception)
         {
@@ -57,5 +59,7 @@ namespace UITest
         private void btn_NewWindow_OnClick(object sender, RoutedEventArgs e) => new DialogWindow().Show();
 
         private void btn_KeyboardDescriptions_OnClick(object sender, RoutedEventArgs e) => GetKeyboardDescriptions();
+
+        public int IntPropery { get; set; }
     }
 }

@@ -21,6 +21,6 @@
         <Button Grid.Row="1" Content="Do Nothing"/>
         <Button Grid.Row="1" x:Name="btn_NewWindow" Content="New Window" Grid.Column="1" Click="btn_NewWindow_OnClick"/>
         <Button Grid.Row="1" x:Name="btn_KeyboardDescriptions" Content="Get Keyboard Descriptions" Grid.Column="2" Click="btn_KeyboardDescriptions_OnClick"/>
-        <TextBox Grid.Row="2" Grid.ColumnSpan="3" InputScope="Number"/>
+        <TextBox Grid.Row="2" Grid.ColumnSpan="3" InputScope="Number" Text="{Binding IntPropery}"/>
     </Grid>
 </Window>
