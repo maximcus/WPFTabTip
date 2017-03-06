@@ -14,7 +14,7 @@ namespace WPFTabTip
 
         /// <summary>
         /// Ignore keyboard, if there is only one, and it's description 
-        /// can be found in ListOfHardwareKeyboardsToIgnoreIfSingleInstance.
+        /// can be found in ListOfKeyboardsToIgnore.
         /// </summary>
         IgnoreIfSingleInstanceOnList,
 
@@ -22,6 +22,12 @@ namespace WPFTabTip
         /// Ignore keyboard, if there is only one.
         /// </summary>
         IgnoreIfSingleInstance,
+
+        /// <summary>
+        /// Ignore all keyboards for which the description 
+        /// can be found in ListOfKeyboardsToIgnore
+        /// </summary>
+        IgnoreIfOnList,
 
         /// <summary>
         /// Ignore all keyboards
@@ -42,31 +48,35 @@ namespace WPFTabTip
             Task<bool> KeyboardConnectedCheckTask = Task.Run(() =>
             {
                 SelectQuery SelectKeyboardsQuery = new SelectQuery("Win32_Keyboard");
-                ManagementObjectSearcher Searcher = new ManagementObjectSearcher(SelectKeyboardsQuery);
-                ManagementObjectCollection Keyboards = Searcher.Get();
-
-                if (Keyboards.Count == 0)
-                    return false;
-
-                if (Keyboards.Count > 1)
-                    return true;
-
-                if (Keyboards.Count == 1)
+                using (ManagementObjectSearcher Searcher = new ManagementObjectSearcher(SelectKeyboardsQuery))
+                using (ManagementObjectCollection Keyboards = Searcher.Get())
                 {
+                    if (Keyboards.Count == 0)
+                        return false;
+
                     switch (IgnoreOptions)
                     {
                         case HardwareKeyboardIgnoreOptions.IgnoreAll:
                             return false;
+
+                        case HardwareKeyboardIgnoreOptions.DoNotIgnore:
+                            return Keyboards.Count > 0;
+
                         case HardwareKeyboardIgnoreOptions.IgnoreIfSingleInstance:
-                            return false;
+                            return Keyboards.Count > 1;
+
                         case HardwareKeyboardIgnoreOptions.IgnoreIfSingleInstanceOnList:
-                            return !IsIgnoredKeyboard(Keyboards.Cast<ManagementBaseObject>().First());
+                            return (Keyboards.Count > 1) ||
+                                   (Keyboards.Count == 1 &&
+                                    !IsIgnoredKeyboard(Keyboards.Cast<ManagementBaseObject>().First()));
+
+                        case HardwareKeyboardIgnoreOptions.IgnoreIfOnList:
+                            return Keyboards.Cast<ManagementBaseObject>().Any(k => !IsIgnoredKeyboard(k));
+
                         default:
                             return true;
                     }
                 }
-
-                return false;
             });
 
 #pragma warning disable 4014
@@ -87,7 +97,7 @@ namespace WPFTabTip
                 .First()
                 .ToString();
 
-            return IgnoreIfSingleInstance.Contains(description);
+            return ListOfKeyboardsToIgnore.Contains(description);
         }
 
         internal static HardwareKeyboardIgnoreOptions IgnoreOptions = HardwareKeyboardIgnoreOptions.DoNotIgnore;
@@ -96,6 +106,6 @@ namespace WPFTabTip
         /// Description of keyboards to ignore if there is only one instance of given keyboard.
         /// If you want to ignore some ghost keyboard, add it's description to this list
         /// </summary>
-        internal static List<string> IgnoreIfSingleInstance { get; } = new List<string>();
+        internal static List<string> ListOfKeyboardsToIgnore { get; } = new List<string>();
     }
 }

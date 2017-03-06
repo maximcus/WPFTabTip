@@ -18,6 +18,8 @@ namespace WPFTabTip
 
             AutomateTabTipOpen(FocusSubject.AsObservable());
             AutomateTabTipClose(FocusSubject.AsObservable(), TabTipClosedSubject);
+
+            AnimationHelper.ExceptionCatched += exception => ExceptionCatched?.Invoke(exception);
         }
 
         private static readonly Subject<Tuple<UIElement, bool>> FocusSubject = new Subject<Tuple<UIElement, bool>>();
@@ -35,13 +37,23 @@ namespace WPFTabTip
             get { return HardwareKeyboard.IgnoreOptions; }
             set { HardwareKeyboard.IgnoreOptions = value; } 
         }
-
-        
+      
+        /// <summary>
+        /// Subscribe to this event if you want to know about exceptions (errors) in this library
+        /// </summary>
+        public static event Action<Exception> ExceptionCatched;
+      
         /// <summary>
         /// Description of keyboards to ignore if there is only one instance of given keyboard.
         /// If you want to ignore some ghost keyboard, add it's description to this list
         /// </summary>
-        public static List<string> ListOfHardwareKeyboardsToIgnoreIfSingleInstance => HardwareKeyboard.IgnoreIfSingleInstance;
+        public static List<string> ListOfHardwareKeyboardsToIgnoreIfSingleInstance => HardwareKeyboard.ListOfKeyboardsToIgnore;
+
+        /// <summary>
+        /// Description of keyboards to ignore.
+        /// If you want to ignore some ghost keyboard, add it's description to this list
+        /// </summary>
+        public static List<string> ListOfKeyboardsToIgnore => HardwareKeyboard.ListOfKeyboardsToIgnore;
 
         private static void AutomateTabTipClose(IObservable<Tuple<UIElement, bool>> focusObservable, Subject<bool> tabTipClosedSubject)
         {

@@ -13,9 +13,9 @@ namespace WPFTabTip
 
         public Screen(Window window)
         {
-            IntPtr windowHandle = new WindowInteropHelper(window).Handle;
-            
-            IntPtr monitor = NativeMethods.MonitorFromWindow(windowHandle, NativeMethods.MONITOR_DEFAULTTONEAREST);
+            IntPtr windowHandle = window != null ? new WindowInteropHelper(window).Handle : IntPtr.Zero;
+
+            IntPtr monitor = window != null ? NativeMethods.MonitorFromWindow(windowHandle, NativeMethods.MONITOR_DEFAULTTONEAREST) : NativeMethods.MonitorFromPoint(new NativeMethods.POINT(0, 0), NativeMethods.MonitorOptions.MONITOR_DEFAULTTOPRIMARY);
 
             NativeMethods.NativeMonitorInfo monitorInfo = new NativeMethods.NativeMonitorInfo();
             NativeMethods.GetMonitorInfo(monitor, monitorInfo);
@@ -44,6 +44,41 @@ namespace WPFTabTip
                 public readonly int Top;
                 public readonly int Right;
                 public readonly int Bottom;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct POINT
+            {
+                public int X;
+                public int Y;
+
+                public POINT(int x, int y)
+                {
+                    this.X = x;
+                    this.Y = y;
+                }
+
+                public POINT(System.Drawing.Point pt) : this(pt.X, pt.Y) { }
+
+                public static implicit operator System.Drawing.Point(POINT p)
+                {
+                    return new System.Drawing.Point(p.X, p.Y);
+                }
+
+                public static implicit operator POINT(System.Drawing.Point p)
+                {
+                    return new POINT(p.X, p.Y);
+                }
+            }
+
+            [DllImport("user32.dll", SetLastError = true)]
+            internal static extern IntPtr MonitorFromPoint(POINT pt, MonitorOptions dwFlags);
+
+            internal enum MonitorOptions : uint
+            {
+                MONITOR_DEFAULTTONULL = 0x00000000,
+                MONITOR_DEFAULTTOPRIMARY = 0x00000001,
+                MONITOR_DEFAULTTONEAREST = 0x00000002
             }
 
 #pragma warning disable 169

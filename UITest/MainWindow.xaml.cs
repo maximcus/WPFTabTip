@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -21,24 +22,36 @@ namespace UITest
             TabTipAutomation.IgnoreHardwareKeyboard = HardwareKeyboardIgnoreOptions.IgnoreAll;
             TabTipAutomation.BindTo<TextBox>();
             TabTipAutomation.BindTo<RichTextBox>();
+            TabTipAutomation.ExceptionCatched += TabTipAutomationOnTest;
         }
-
+        private void TabTipAutomationOnTest(Exception exception)
+        {
+            MessageBox.Show(exception.Message);
+        }
         private static void GetKeyboardDescriptions()
         {
             string tempFileName = "temp.txt";
-
-            List<string> KeyboardDescriptions = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")).Get()
-                .Cast<ManagementBaseObject>()
-                .SelectMany(keyboard =>
-                    keyboard.Properties
-                        .Cast<PropertyData>()
-                        .Where(k => k.Name == "Description")
-                        .Select(k => k.Value as string))
-                .ToList();
+            List<string> KeyboardDescriptions = QueryWmiKeyboards();
 
             File.WriteAllLines(tempFileName, KeyboardDescriptions);
 
             Process.Start(tempFileName);
+        }
+
+        private static List<string> QueryWmiKeyboards()
+        {
+            using (var searcher = new ManagementObjectSearcher(new SelectQuery("Win32_Keyboard")))
+            using (var result = searcher.Get())
+            {
+                return result
+                    .Cast<ManagementBaseObject>()
+                    .SelectMany(keyboard =>
+                        keyboard.Properties
+                            .Cast<PropertyData>()
+                            .Where(k => k.Name == "Description")
+                            .Select(k => k.Value as string))
+                    .ToList();
+            }
         }
 
         private void btn_NewWindow_OnClick(object sender, RoutedEventArgs e) => new DialogWindow().Show();
