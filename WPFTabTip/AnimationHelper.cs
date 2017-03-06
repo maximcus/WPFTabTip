@@ -121,7 +121,7 @@ namespace WPFTabTip
             if (rootWindow?.WindowState != WindowState.Maximized)
                 return rootWindow;
             else
-                return rootWindow.Content as FrameworkElement;
+                return VisualTreeHelper.GetChild(rootWindow, 0) as FrameworkElement;
         }
 
         private static double GetYOffsetToMoveUIElementInToWorkArea(Rectangle uiElementRectangle, Rectangle workAreaRectangle)
