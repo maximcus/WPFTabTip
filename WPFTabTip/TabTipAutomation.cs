@@ -106,6 +106,16 @@ namespace WPFTabTip
                 handledEventsToo: true);
 
             EventManager.RegisterClassHandler(
+                classType: typeof(T),
+                routedEvent: UIElement.PreviewMouseDownEvent,
+                handler: new RoutedEventHandler((s, e) =>
+                {
+                    if (((UIElement)s).IsFocused)
+                        FocusSubject.OnNext(new Tuple<UIElement, bool>((UIElement)s, true));
+                }),
+                handledEventsToo: true);
+
+            EventManager.RegisterClassHandler(
                 classType: typeof(T), 
                 routedEvent: UIElement.GotFocusEvent, 
                 handler: new RoutedEventHandler((s, e) => FocusSubject.OnNext(new Tuple<UIElement, bool>((UIElement) s, true))), 
